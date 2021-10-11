@@ -37,7 +37,7 @@ func CreateCustomer(c *gin.Context) {
 	customer := models.Customer{ID: input.ID, FirstName: input.FirstName, LastName: input.LastName, Address1: input.Address1, Email: input.Email}
 	database.Connector.Create(&customer)
 
-	c.JSON(http.StatusOK, gin.H{"data": customer})
+	c.JSON(http.StatusOK, gin.H{"customer": customer})
 }
 
 // GET /books/:id

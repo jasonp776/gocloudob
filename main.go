@@ -37,22 +37,19 @@ func main() {
 			})
 		})
 	}
-	//router.GET("/login/:username", controllers.Login)
 
-	//profile route
-	//router.POST("/profile/:username", controllers.CreateProfile)
-
-	/*router.GET("/customers", controllers.FindCustomers)
+	router.GET("/customers", controllers.FindCustomers)
 	router.POST("/customers", controllers.CreateCustomer)
 	router.GET("/customer/:id", controllers.FindCustomerById)
 	router.PATCH("/customer/:id", controllers.UpdateCustomerByID) // new
 	router.DELETE("/customer/:id", controllers.DeleteCustomerByID)
 
-	router.GET("/products", controllers.FindProducts)
-	router.POST("/products", controllers.CreateProduct)
-	router.GET("/product/:id", controllers.FindProductById)
-	router.PATCH("/product/:id", controllers.UpdateProductByID) // new
-	router.DELETE("/product/:id", controllers.DeleteProductByID)
+	/*
+		router.GET("/products", controllers.FindProducts)
+		router.POST("/products", controllers.CreateProduct)
+		router.GET("/product/:id", controllers.FindProductById)
+		router.PATCH("/product/:id", controllers.UpdateProductByID) // new
+		router.DELETE("/product/:id", controllers.DeleteProductByID)
 	*/
 	//err := router.Run(":9080")
 	if err := router.Run(":9080"); err != nil {

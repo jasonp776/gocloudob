@@ -1,7 +1,8 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: golang-pipeline
+  name: go-pipeline
+  namespace: pipeline
 spec:
   resources:
     - name: repo

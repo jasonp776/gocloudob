@@ -1,3 +1,4 @@
+---
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
@@ -5,7 +6,6 @@ metadata:
 spec:
   params:
     - name: CGO_ENABLED
- #   - name: FLAGS
     - name: GOOS
     - name: packages
       description: "packages to build (default: ./...)"
@@ -29,11 +29,33 @@ spec:
           value: "$(params.CGO_ENABLED)"
         - name: GOOS
           value: "$(params.GOOS)"
-    ## Go Build
-    - name: run-build
+    - name: run-build ##Go build
       image: golang:alpine
       workingDir: /workspace/repo
       script: |
         echo "Task 3 - Start Golang Build"
         go build -o $(params.DEST_FOLDER) $(params.DEST_FOLDER)
         echo "Task 3 - End Golang Build"
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: gotask-push
+spec:
+  params:
+    - name: IMAGE_TAG
+    - name: IMAGE_REPO
+  resources:
+    inputs:
+      - name: repo
+        type: git
+  steps:
+    - name: build-and-push
+      image: gcr.io/kaniko-project/executor:v1.3.0
+      env:
+        - name: DOCKER_CONFIG
+          value: /tekton/home/.docker
+      command:
+        - /kaniko/executor
+        - --context=/workspace/repo
+        - --destination=$(params.IMAGE_REPO):$(params.IMAGE_TAG)

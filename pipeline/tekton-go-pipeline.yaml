@@ -1,0 +1,131 @@
+---
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: golang-pipeline-resource
+spec:
+  type: git
+  params:
+    - name: url
+      value: https://github.com/jasonp776/gocloudob
+    - name: revision
+      value: staging
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: basic-user-pass
+  annotations:
+    tekton.dev/docker-0: registry.ns0.civo.com
+stringData:
+  username: jasonp
+  password: Password@12345
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: go-service-account
+secrets:
+  - name: basic-user-pass
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: gotask-build
+spec:
+  params:
+    - name: CGO_ENABLED
+    - name: GOOS
+    - name: packages
+      description: "packages to build (default: ./...)"
+    - name: DEST_FOLDER
+      description: destination of main.go
+  resources:
+    inputs:
+      - name: repo
+        type: git
+  steps:
+    - name: check-security
+      image: golang:alpine
+      workingDir: /workspace/repo
+      script: |
+        echo "Task 2 - Start Golang Security Check"
+        go get github.com/securego/gosec/v2/cmd/gosec
+        gosec $(params.packages)
+        echo "Task 2 - End Golang Security Check"
+      env:
+        - name: CGO_ENABLED
+          value: "$(params.CGO_ENABLED)"
+        - name: GOOS
+          value: "$(params.GOOS)"
+    - name: run-build ##Go build
+      image: golang:alpine
+      workingDir: /workspace/repo
+      script: |
+        echo "Task 3 - Start Golang Build"
+        go build -o $(params.DEST_FOLDER) $(params.DEST_FOLDER)
+        echo "Task 3 - End Golang Build"
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: gotask-push
+spec:
+  params:
+    - name: IMAGE_TAG
+    - name: IMAGE_REPO
+  resources:
+    inputs:
+      - name: repo
+        type: git
+  steps:
+    - name: build-and-push
+      image: gcr.io/kaniko-project/executor:v1.3.0
+      env:
+        - name: DOCKER_CONFIG
+          value: /tekton/home/.docker
+      command:
+        - /kaniko/executor
+        - --context=/workspace/repo
+        - --destination=$(params.IMAGE_REPO):$(params.IMAGE_TAG)
+---
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: go-pipeline
+spec:
+  resources:
+    - name: repo
+      type: git
+  tasks:
+    - name: stage-go-build
+      params:
+        - name: CGO_ENABLED
+          value: "0"
+        - name: GOOS
+          value: "linux"
+        - name: packages
+          value: "./..."
+        - name: DEST_FOLDER
+          value: '.'
+      resources:
+        inputs:
+          - name: repo
+            resource: repo
+      taskRef:
+        name: gotask-build
+     # Build docker image and push to registry
+    - name: stage-go-buildpush
+      params:
+        - name: IMAGE_REPO
+          value: 'registry.ns0.civo.com/library/gocloudob'
+        - name: IMAGE_TAG
+          value: '1.0'
+      taskRef:
+        name: gotask-push
+      runAfter:
+        - stage-go-build
+      resources:
+        inputs:
+          - name: repo      # name of the Task input (see Task definition)
+            resource: repo  # name of the Pipeline resource

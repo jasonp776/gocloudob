@@ -1,0 +1,29 @@
+---
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: golang-pipeline-resource
+spec:
+  type: git
+  params:
+    - name: url
+      value: https://github.com/jasonp776/gocloudob
+    - name: revision
+      value: staging
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: basic-user-pass
+  annotations:
+    tekton.dev/docker-0: registry.ns0.civo.com
+stringData:
+  username: jasonp
+  password: Password@12345
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: go-service-account
+secrets:
+  - name: basic-user-pass
