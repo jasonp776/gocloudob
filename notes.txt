@@ -1,0 +1,47 @@
+import (
+    "time"
+
+    "github.com/jinzhu/gorm"
+
+    // used by gorm
+    _ "github.com/jinzhu/gorm/dialects/postgres"
+)
+
+type Beer struct {
+    BeerId         uint      `json:"id"`
+    Name           string    `json:"name" gorm:"not null;" sql:"unique"`
+    Description    string    `json:"description" gorm:"not null;"`
+    ImageURL       string    `json:"image_url"`
+    AlcoholContent float64   `json:"alcohol_content, default:0"`
+    Featured       bool      `json:"featured"`
+    BrewStart      time.Time `json:"brew_start"`
+    BrewEnd        time.Time `json:"brew_end"`
+    Brewers        []Brewer  `json:"brewers" gorm:"many2many:beer_brewers;association_foreignkey:brewer_id;foreignkey:beer_id"`
+}
+
+type Brewer struct {
+    BrewerId  uint   `json:"id"`
+    FirstName string `json:"first_name"`
+    LastName  string `json:"last_name"`
+    Title     string `json:"title"`
+    Featured  bool   `json:"featured"`
+}
+
+func migrate() {
+    // Connection is the connection string
+    connection := "host=%v port=%v user=%v dbname=%v password=%v sslmode=%v connect_timeout=%v"
+    db, _ := gorm.Open("postgres", connection)
+    db.AutoMigrate(&Beer{}, &Brewer{})
+    db.Model(&Beer{}).Related(&Brewer{}, "Brewers")
+
+    db.Create(&Brewer{FirstName: "justin"})
+    db.Create(&Beer{
+        Name:           "some lager",
+    Description:    "a description of some pale ale",
+    ImageURL:       "http://via.placeholder.com/350x150",
+    AlcoholContent: 4.5,
+    Featured:       false,
+    BrewStart:      utils.ParseTime("30-10-2017 13:00 (AEDT)"),
+    BrewEnd:        utils.ParseTime("14-11-2017 13:00 (AEDT)"),
+    }).Association("Brewers").Append(&Brewer{BrewerId: 123,})
+}

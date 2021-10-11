@@ -1,0 +1,56 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: gotask-build
+spec:
+  params:
+    - name: CGO_ENABLED
+ #   - name: FLAGS
+    - name: GOOS
+    - name: packages
+      description: "packages to build (default: ./...)"
+    - name: DEST_FOLDER
+      description: destination of main.go
+
+  resources:
+    inputs:
+      - name: repo
+        type: git
+  steps:
+
+  # # Run unit test
+  #   - name: run-test
+  #     image: golang:alpine
+  #     workingDir: /workspace/repo
+  #     script: |
+  #       echo "Task 1 - Start Golang Unit Test"
+  #       go test $(params.FLAGS) $(params.packages)
+  #       echo "Task 1 - End Golang Unit Test"
+  #     env:
+  #       - name: CGO_ENABLED
+  #         value: "$(params.CGO_ENABLED)"
+  #       - name: GOOS
+  #         value: "$(params.GOOS)"
+
+      ## Check Security    
+    - name: check-security
+      image: golang:alpine
+      workingDir: /workspace/repo
+      script: |
+        echo "Task 2 - Start Golang Security Check"
+        go get github.com/securego/gosec/v2/cmd/gosec
+        gosec $(params.packages)
+        echo "Task 2 - End Golang Security Check"
+      env:
+        - name: CGO_ENABLED
+          value: "$(params.CGO_ENABLED)"
+        - name: GOOS
+          value: "$(params.GOOS)"
+    ## Go Build
+    - name: run-build
+      image: golang:alpine
+      workingDir: /workspace/repo
+      script: |
+        echo "Task 3 - Start Golang Build"
+        go build -o $(params.DEST_FOLDER) $(params.DEST_FOLDER)
+        echo "Task 3 - End Golang Build"

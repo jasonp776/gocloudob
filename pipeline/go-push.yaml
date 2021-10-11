@@ -1,0 +1,29 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: gotask-push
+spec:
+  params:
+    - name: IMAGE_TAG
+    - name: IMAGE_REPO
+  resources:
+    inputs:
+      - name: repo
+        type: git
+#    stepTemplate:
+#    envFrom:
+#      - configMapRef:
+#          name: argocd-env-configmap  # used for server address
+#      - secretRef:
+#          name: argocd-env-secret  # used for authentication (username/password or auth token)
+  steps:
+    - name: build-and-push
+      image: gcr.io/kaniko-project/executor:v1.3.0
+      env:
+        - name: DOCKER_CONFIG
+          value: /tekton/home/.docker
+      command:
+        - /kaniko/executor
+        - --dockerfile=Dockerfile
+        - --context=/workspace/repo
+        - --destination=$(params.IMAGE_REPO):$(params.IMAGE_TAG)
