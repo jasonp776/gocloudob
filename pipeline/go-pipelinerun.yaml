@@ -1,0 +1,12 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: go-pipelinerun
+spec:
+  serviceAccountName: go-service-account
+  pipelineRef:
+    name: golang-pipeline
+  resources:
+  - name: repo
+    resourceRef:
+      name: golang-pipeline-resource

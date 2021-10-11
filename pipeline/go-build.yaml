@@ -11,28 +11,11 @@ spec:
       description: "packages to build (default: ./...)"
     - name: DEST_FOLDER
       description: destination of main.go
-
   resources:
     inputs:
       - name: repo
         type: git
   steps:
-
-  # # Run unit test
-  #   - name: run-test
-  #     image: golang:alpine
-  #     workingDir: /workspace/repo
-  #     script: |
-  #       echo "Task 1 - Start Golang Unit Test"
-  #       go test $(params.FLAGS) $(params.packages)
-  #       echo "Task 1 - End Golang Unit Test"
-  #     env:
-  #       - name: CGO_ENABLED
-  #         value: "$(params.CGO_ENABLED)"
-  #       - name: GOOS
-  #         value: "$(params.GOOS)"
-
-      ## Check Security    
     - name: check-security
       image: golang:alpine
       workingDir: /workspace/repo

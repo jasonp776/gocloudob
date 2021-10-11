@@ -3,7 +3,6 @@ package controllers
 import (
 	"net/http"
 
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 
 	"golang.org/x/crypto/bcrypt"
@@ -71,7 +70,7 @@ func Login(c *gin.Context) { // Get model if exist
 
 }
 
-func Login2(c *gin.Context) {
+/* func Login2(c *gin.Context) {
 
 	session := sessions.Default(c)
 	session.Set("id", 12090292)
@@ -81,12 +80,12 @@ func Login2(c *gin.Context) {
 		"message": "User Sign In successfully",
 	})
 }
-
-func Logout(c *gin.Context) {
+*/
+/* func Logout(c *gin.Context) {
 	session := sessions.Default(c)
 	session.Clear()
 	session.Save()
 	c.JSON(http.StatusOK, gin.H{
 		"message": "User Sign out successfully",
 	})
-}
+} */

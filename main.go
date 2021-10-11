@@ -54,7 +54,11 @@ func main() {
 	router.PATCH("/product/:id", controllers.UpdateProductByID) // new
 	router.DELETE("/product/:id", controllers.DeleteProductByID)
 	*/
-	router.Run(":9080")
+	//err := router.Run(":9080")
+	if err := router.Run(":9080"); err != nil {
+		log.Fatal("error")
+	}
+
 }
 
 func initDB() {

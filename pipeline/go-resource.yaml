@@ -1,0 +1,11 @@
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: golang-pipeline-resource
+spec:
+  type: git
+  params:
+    - name: url
+      value: https://github.com/jasonp776/gocloudob
+    - name: revision
+      value: main
